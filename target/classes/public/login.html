@@ -1,28 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="style/style-login.css">
+    <link rel="icon" href="./imgs/logo.png" crossorigin>
 </head>
+
 <body>
-    <h1>Login</h1>
-    <form>
-        <label for="loginEmail">E-mail:</label>
-        <input type="email" id="loginEmail" placeholder="E-mail" required>
-        <br>
-        <br>
-        <label for="loginSenha">Senha:</label>
-        <input type="password" id="loginSenha" placeholder="senha" required>
-        <br>
-        <br>
-        <button type="submit" class="btn-entrar">Entrar</button>
-        <br>
-        <br>
-        <a href="registro.html">Clique aqui para fazer o cadastro!</a>
-    </form>
-    <script src="src/login.js"></script>
+    <div class="background">
+        <div class="container">
+            <div class="logo">
+                <img src="./imgs/logo.png" alt="Logo">
+            </div>
+            <div class="form-container">
+                <h1>Login</h1>
+                <form id="loginForm">
+                    <label for="loginEmail">E-mail:</label>
+                    <input type="email" id="loginEmail" placeholder="E-mail" required>
+                    <br><br>
+                    <label for="loginSenha">Senha:</label>
+                    <input type="password" id="loginSenha" placeholder="Senha" required>
+                    <br><br>
+                    <button type="submit" class="btn-entrar">Entrar</button>
+                    <br><br>
+                    <a href="registro.html">Clique aqui para fazer o cadastro!</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const loginForm = document.getElementById("loginForm");
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginSenha").value;
+
+            try {
+                const response = await fetch("/login-endpoint", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                if (response.status === 200) {
+                    // Successful login
+                    alert("Login successful. You are now logged in.");
+                    window.location.href = "produtos.html";
+                } else {
+                    // Login failed
+                    alert("Login failed. Please check your email and password.");
+                }
+            } catch (error) {
+                console.error("An error occurred:", error);
+            }
+        });
+    </script>
 </body>
+
 </html>

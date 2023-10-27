@@ -2,35 +2,89 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style/index-style.css">
+    <link rel="stylesheet" href="style/produtos-style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style/produtos-style.css">
+    <link rel="icon" href="./imgs/logo.png" crossorigin>
     <title>EstoqueMaster</title>
+    <style>
+        .scroller {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+		
+        .btn {
+            padding: 6px;
+            font-size: 15px;
+        }
+
+        .produtos-tabela {
+            min-width: 100%;
+            border-collapse: collapse;
+        }
+
+        .produtos-tabela th,
+        .produtos-tabela td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #dddddd;
+        }
+
+        .btn-estoque {
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .produtos-tabela tbody tr:hover {
+            background-color: #e8e8e8;
+            cursor: pointer;
+        }
+        
+        .button-group {
+    display: flex;
+    align-items: center; /* Vertically align the buttons */
+    justify-content: flex-start; /* Align buttons to the left */
+    gap: 5px;
+}
+
+.btn-pesquisa {
+    display: flex;
+    justify-content: flex-end; /* Align to the right */
+    cursor: pointer;
+}
+
+    </style>
 </head>
 <body>
-    
     <header>
         <a href="#"><img class="logo" src="imgs/logo.png" alt="Logo da EstoqueMaster"></a>
         <a href="config-conta.html"><button class="btn-entre">Minha conta</button></a>
     </header>
-    
+    <br><br>
+    <h2 class="titulo-estoque">Meu estoque</h2>
+    <br>
     <main>
         <div class="topo-estq">
-            <a href="cadastro-produto.html" style="text-decoration: none;">
-            <button class="btn-estoque" style="display: flex; align-items: center; justify-content: center; gap: 5px">
-                <span><img class="icon" src="imgs/plus.webp" alt=""></span>
-                <p>Novo produto</p>
-            </button></a>
-            <h2 class="titulo-estoque">Meu estoque</h2>
-            <button class="btn-pesquisa">
-                <span><img class="icon" src="imgs/search-icon.png" alt=""></span>
-            </button>
-        </div>
+    <div class="button-group">
+        <button id="newOrEditProductButton" class="btn-estoque">
+            <span><img class="icon" src="imgs/plus.webp" alt=""></span>
+            <p>Novo Produto</p>
+        </button>
+        <button id="venderButton" class="btn-estoque" style="display: none;">
+            <span><img class="icon" src="https://th.bing.com/th/id/R.6318034f4010d3cdb522d298f14ebb18?rik=hwaqy7dvoCD34Q&riu=http%3a%2f%2fclipart-library.com%2fnew_gallery%2f267-2675544_dinero-png-sack-of-money-icon-png.png&ehk=8jd%2fCfJuSZGbF4mveS32%2fdZzIMi6xSUj7Z17jBeJSkM%3d&risl=&pid=ImgRaw&r=0" alt=""></span></br>
+            <p>Vender</p>
+        </button>
+    </div>
+    <button class="btn-pesquisa" id="btnPesquisa">
+        <span><img class="icon" src="imgs/search-icon.png" alt=""></span>
+    </button>
+</div>
+
 
         <div class="btns-estoque">
             <div class="direita-btns">
@@ -38,69 +92,281 @@
                 <button class="btn-estoque" id="btn-produtos-faltando">Mostrar produtos em falta</button>
             </div>
             <div class="esquerda-btns">
-                <button class="btn-estoque" style="background-color: rgb(231, 17, 17);" id="btn-excluir">Excluir selecionado</button>
+                <button onclick="handleExcluirSelecionado()" class="btn-estoque" style="background-color: rgb(231, 17, 17);" id="btn-excluir">Excluir selecionado</button>
                 <button class="btn-estoque" id="btn-selecionar-todos">Selecionar todos</button>
             </div>
         </div>
-
         <div class="scroller">
-
-        
-        <table style="height: 100px;" class="produtos-tabela">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Nome</th>
-                    <th>Categoria</th>
-                    <th>Nobreza</th>
-                    <th>Preço unid.</th>
-                    <th>Disponível</th>
-                    <th>Estoque mín.</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                
-            </tbody>
-        </table>
+            <table class="produtos-tabela">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Id</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    <!-- Product data -->
+                </tbody>
+            </table>
         </div>
-
     </main>
-
-    <div class="caixa-pesquisa" id="myModal">
-        <button class="fechar"><span>&times;</span></button>
-        
-        <form action="">
-            <label for="categoria-select">Filtrar por categoria</label>
-            <select class="categoria-select" name="categoria-select" id="">
-            </select>
-            <button class="btn-filtrar-categorias" type="submit">Filtrar</button>
-        </form>
-        <form action="">
-
-            <p>Filtrar por nobreza</p>
-            <div class="nobre">
-                <input type="checkbox" name="nobreza-nobre" id="nobreza-nobre">
-                <label for="nobreza-nobre" value="nobre">Nobre</label>
-            </div>
-            <div class="bruto">
-                <input type="checkbox" name="nobreza-bruto" id="nobreza-bruto">
-                <label for="nobreza-bruto" value="bruto">Bruto</label>
-            </div>
-            
-            <button type="submit">Filtrar</button>
-        </form>
-        <form action="">
-            <label for="search">Busca por nome</label>
-            <input type="text" name="search" id="">
-            <button type="submit">Buscar</button>
-        </form>
-    </div>
-
     <footer>
-        <p>Desenvolvido por EstoqueMaster.</p>
-        <a target="_blank" href="https://github.com/ICEI-PUC-Minas-PMGCC-TI/ti-1-pmg-cc-m-20231-gestao-e-planejamento-de-empresas"><img src="imgs/github-icon.png" alt=""></a>
+        <p>© EstoqueMaster</p>
+        <a target="_blank" href="https://github.com/ICEI-PUC-Minas-PMGCC-TI/ti-1-pmg-cc-m-20231-gestao-e-planejamento-de-empresas">
+            <img src="imgs/github-icon.png" alt="">
+        </a>
     </footer>
-    <script src="src/tabela-produtos.js"></script>
+    <script>
+        // Array to store selected row IDs
+        const selectedRowIds = [];
+
+        function handleRowClick(rowId) {
+    const row = document.getElementById(rowId);
+
+    if (selectedRowIds.includes(rowId)) {
+        // Deselect the row
+        const index = selectedRowIds.indexOf(rowId);
+        selectedRowIds.splice(index, 1);
+        row.style.backgroundColor = '';
+        row.classList.remove('selected'); // Remove the "selected" class
+        console.log(`Deselected Row ID: ${rowId}`);
+    } else {
+        // Select the current row
+        selectedRowIds.push(rowId);
+        row.style.backgroundColor = '#FF7F7F'; // Set the desired background color
+        row.classList.add('selected'); // Add the "selected" class
+        console.log(`Selected Row ID: ${rowId}`);
+    }
+    console.log(selectedRowIds);
+
+    // Call the function to update the button state
+    updateButtonState();
+}
+
+        function handleExcluirSelecionado() {
+            // Send the selectedRowIds array to the server for deletion
+            fetch('/products/deleteids', {
+                method: 'POST',
+                body: JSON.stringify({ selectedRowIds }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    alert('Deleted');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    fetchProducts();
+                }
+            });
+        }
+
+        // Function to fetch products and add click event listeners
+        function fetchProducts() {
+            fetch('/products/list')
+                .then(response => response.text())
+                .then(html => {
+                    const tbody = document.getElementById('productTableBody');
+                    tbody.innerHTML = html;
+
+                    // Add event listeners to table rows
+                    const rows = document.querySelectorAll('.produtos-tabela tbody tr');
+                    rows.forEach(row => {
+                        const rowId = row.getAttribute('id');
+                        row.addEventListener('click', () => handleRowClick(rowId));
+                    });
+                });
+        }
+
+        // Function to update the button text and behavior
+function updateButtonState() {
+    const newOrEditProductButton = document.getElementById('newOrEditProductButton');
+    const venderButton = document.getElementById('venderButton');
+    if (selectedRowIds.length === 1) {
+        // If a single row is selected, change the button to "Editar Produto"
+        newOrEditProductButton.innerHTML = '<span><img class="icon" src="imgs/update.png" alt=""></span><p>Editar Produto</p>';
+        newOrEditProductButton.removeEventListener('click', handleNewProductClick);
+        newOrEditProductButton.addEventListener('click', handleEditProductClick);
+        venderButton.style.display = 'inline-block';
+    } else if (selectedRowIds.length > 1) {
+        newOrEditProductButton.innerHTML = '<span><img class="icon" src="imgs/plus.webp" alt=""></span><p>Novo Produto</p>';
+        newOrEditProductButton.removeEventListener('click', handleEditProductClick);
+        newOrEditProductButton.addEventListener('click', handleNewProductClick);
+        venderButton.style.display = 'none';
+    } else {
+        newOrEditProductButton.innerHTML = '<span><img class="icon" src="imgs/plus.webp" alt=""></span><p>Novo Produto</p>';
+        newOrEditProductButton.removeEventListener('click', handleEditProductClick);
+        newOrEditProductButton.addEventListener('click', handleNewProductClick);
+        venderButton.style.display = 'none';
+    }
+}
+
+// Function to handle the "Selecionar Todos" button click
+function handleSelectAllClick() {
+    // Select all rows and highlight them
+    const rows = document.querySelectorAll('.produtos-tabela tbody tr');
+    rows.forEach(row => {
+        const rowId = row.getAttribute('id');
+        if (!selectedRowIds.includes(rowId)) {
+            selectedRowIds.push(rowId);
+            row.style.backgroundColor = '#FF7F7F'; // Set the desired background color
+        }
+    });
+    
+    // Update the button state
+    updateButtonState();
+}
+
+// Function to handle the "VENDER" button click
+function handleVenderClick() {
+    const amountToSell = prompt('Enter the amount to sell:', '1');
+    const buyerCPF = prompt('Enter the buyer cpf: ', '123456789');
+
+    if (amountToSell === null) {
+        return;
+    }
+
+    if (isNaN(amountToSell) || amountToSell <= 0) {
+        alert('Please enter a valid positive number for the amount.');
+        return;
+    }
+
+    // Get the product ID from the selected row's class
+    const selectedRow = document.querySelector('.produtos-tabela tbody tr.selected');
+    if (selectedRow) {
+        const selectedProductId = selectedRow.id; // Extract the product ID
+        const updatedAmount = amountToSell;
+
+        // Fetch the current amount from your data source (you may need to modify this part)
+        const currentEstoque = getCurrentEstoque(selectedProductId); // Modify this to fetch the current amount
+
+        if (currentEstoque >= updatedAmount) {
+            // Send a request to update the product's amount
+            fetch(`/products/updateamount/${selectedProductId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ amount: updatedAmount }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => {
+                    if (response.status === 200) {
+                        alert(`Sold ${updatedAmount} units of the product (ID: ${selectedProductId}).`);
+                        
+                        // Create a new transaction
+                        createTransaction(selectedProductId, amountToSell, buyerCPF);
+
+                        // Fetch updated product data after the sale
+                        fetchProducts();
+                    } else {
+                        alert('Failed to sell the product.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error selling the product:', error);
+                    alert('An error occurred while selling the product.');
+                });
+        } else {
+            alert('The amount to sell exceeds the current stock (Estoque).');
+        }
+    } else {
+        alert('Please select a product to sell.');
+    }
+}
+
+function createTransaction(productId, amountSold, buyerCPF) {
+    // Create a new transaction by sending a request to the server
+    fetch('/transactions/insert', {
+        method: 'POST',
+        body: JSON.stringify({
+            buyerCpf: buyerCPF,
+            productId: parseInt(productId),
+            amountSold: parseInt(amountSold)
+        }),
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (response.status === 201) {
+            console.log('Transaction created successfully');
+        } else {
+            console.error('Failed to create a new transaction');
+        }
+    })
+    .catch(error => {
+        console.error('Error creating a new transaction:', error);
+    });
+}
+
+
+function getCurrentEstoque(productId) {
+    // Get the <td> element containing the current stock for the specified product ID
+    const stockCell = document.getElementById("amount"+productId);
+
+    if (stockCell) {
+        // Parse the current stock from the cell's content
+        const currentStock = parseFloat(stockCell.innerText);
+        return currentStock;
+    } else {
+        // Handle the case where the product ID is not found
+        console.error(`Stock cell not found for product ID ${productId}`);
+        return 0; // Return 0 as a default value
+    }
+}
+
+
+        // Attach event listeners to the "Selecionar Todos" and "VENDER" buttons
+        const selectAllButton = document.getElementById('btn-selecionar-todos');
+        selectAllButton.addEventListener('click', handleSelectAllClick);
+
+        const venderButton = document.getElementById('venderButton');
+        venderButton.addEventListener('click', handleVenderClick);
+        // Function to handle the "Novo Produto" button click
+function handleNewProductClick() {
+    	window.location.href = 'cadastro-produto.html';
+   }
+
+// Function to handle the "Editar Produto" button click
+function handleEditProductClick() {
+    if (selectedRowIds.length === 1) {
+        // Get the selected product ID
+        const selectedProductId = selectedRowIds[0];
+
+        // Redirect to the edit product page (cadastro-produto.html) with the product ID as a query parameter
+        window.location.href = `cadastro-produto.html?id=${selectedProductId}`;
+    }
+}
+
+
+        // Function to check the session status
+        function checkSession() {
+            fetch('/check-session', { method: 'GET' })
+                .then(response => {
+                    if (response.status === 401) {
+                        // Session is not active, redirect to the login page
+                        window.location.href = '/login.html';
+                    } else {
+                        // Session is active, you can add any other logic here
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking session:', error);
+                });
+        }
+
+        // Set up an interval to call checkSession every 1000 milliseconds (optional)
+        const sessionCheckInterval = setInterval(checkSession, 1000);
+
+        // Initialize by fetching products and setting button state
+        fetchProducts();
+        updateButtonState();
+    </script>
 </body>
 </html>

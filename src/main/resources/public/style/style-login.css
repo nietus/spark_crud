@@ -1,22 +1,89 @@
-body{
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #f2f2f2;
+body {
     margin: 0;
     padding: 0;
-}
-
-h1{
-    text-align: center;
-}
-
-form{
-    width: 300px;
-    margin: 0 auto;
-    background-color: #ffffff;
+    background-image: url('https://delage.com.br/wp-content/uploads/2021/02/stockout-scaled.jpg.webp');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-color: rgba(255, 255, 255, 0.5);
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;  
+  }
+  
+  .container {
+    width: 100%; /* Aumente o tamanho do quadro branco */
+    max-width: 500px; /* Aumente o tamanho máximo do quadro branco */
     padding: 20px;
-}
-
-label{
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px; /* Aumente o raio do border-radius para suavizar as bordas */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+   
+  .logo {
+    flex: 1;
+    text-align: center;
+  }
+  
+  /* Adicione um efeito de escala ao passar o mouse sobre a logo */
+  .logo img {
+    max-width: 100%;
+    transition: transform 0.2s ease; /* Adicione uma transição suave */
+  }
+  
+  .logo img:hover {
+    transform: scale(1.1); /* Aumenta a escala em 10% no hover */
+  }
+  
+  .form-container {
+    flex: 3; /* Aumente o espaço para o formulário */
+    text-align: center;
+    padding: 20px;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  label {
     display: block;
-    margin-bottom: 10px;   
-} 
+    margin-bottom: 5px;
+  }
+  
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .btn-entrar {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .btn-entrar:hover {
+    background-color: #0056b3;
+  }
+  
+  a {
+    text-decoration: none;
+    color: #007BFF;
+    font-size: 14px;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }

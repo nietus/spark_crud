@@ -47,13 +47,11 @@ header {
 
 .btn-salvar{
     background-color: var(--second-bg-color);
-    padding: 20px 10px;
     color: white;
     font-size: 18px;
     font-weight: 200;
     border: none;
     border-radius: 10px;
-    width: 200px;
     transition: 0.3s;
     float: right;
 }
@@ -70,16 +68,15 @@ header {
 
 .btn-voltar{
     background-color: var(--second-bg-color);
-    padding: 20px 10px;
     color: white;
     font-size: 18px;
     font-weight: 200;
     border: none;
     border-radius: 10px;
-    width: 200px;
     transition: 0.3s;
     float: right;
-    margin-right: 50px;
+    margin-right: 25px;
+    margin-bottom:25px;
 }
 
 .btn-voltar:hover {
@@ -188,4 +185,18 @@ button:hover{
 
 .pe{
     cursor: pointer;
+}
+
+#inputImageUrl {
+    display: none; /* Hide the input element */
+    /* Add styling for a button-like appearance */
+    background-color: #007bff; /* Change the background color */
+    color: #fff; /* Text color */
+    padding: 10px 15px; /* Padding to make it clickable */
+    border: none; /* Remove border */
+    cursor: pointer; /* Show pointer cursor on hover */
+    border-radius: 5px; /* Add some border radius for a button-like shape */
+    margin-bottom:1rem;
+    width:50%;
+    height:3rem;
 }

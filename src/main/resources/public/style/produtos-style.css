@@ -118,6 +118,7 @@ header {
 
 .scroller {
     overflow-y: scroll;
+    overflow-x: scroll;
     height: 90vh;
     width: 90%;
     margin: auto;
@@ -229,4 +230,24 @@ footer p {
 footer a {
     position: absolute;
     right: 40px;
+}
+
+@media (max-width: 767px) {
+    main {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .btns-estoque {
+        flex-direction: column;
+    }
+
+    .btns-estoque .direita-btns,
+    .btns-estoque .esquerda-btns {
+        width: 100%; 
+    }
+
+    .produtos-tabela {
+        overflow-x: auto;
+    }
 }

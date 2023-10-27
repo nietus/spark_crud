@@ -5,6 +5,11 @@
     font-family: 'Inter', sans-serif;
 }
 
+body {
+    overflow-x: hidden;
+}
+
+
 header {
     background-color: #cff4fc;
     display: flex;
@@ -48,6 +53,7 @@ header {
     background-color: #0063B2;
     border-radius: 10px;
     padding: 50px;
+    flex-direction: column;
     color: white;
     font-weight: bold;
 }
@@ -142,7 +148,7 @@ header {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("imagem-estoque.png");
+    background-image: url("../imgs/imagem-estoque.png");
     opacity: 0.7;
     z-index: -1;
 }
@@ -200,9 +206,6 @@ footer a {
     header, footer {
         width: 100%;
     }
-    .introducao {
-        flex-direction: column;
-    }
 
     .qualidades {
         grid-template-columns: 50% 50%;
@@ -232,5 +235,12 @@ footer a {
     #qualidade4 {
         grid-column: 2;
         grid-row: 3;
+    }
+}
+
+@media (max-width: 800px) {
+    .qualidades,
+    .mockup-2 {
+        display: none;
     }
 }
