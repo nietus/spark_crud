@@ -22,7 +22,7 @@ public class BuyerDAO extends DAO {
     public boolean insert(Buyers buyer) {
         boolean status = false;
         try {
-            String sql = "INSERT INTO estoquemaster.buyer (cpf, nome, address, contact_info, user_id) "
+            String sql = "INSERT INTO estoquemaster.buyer (cpf, name, address, contact_info, user_id) "
                        + "VALUES (?, ?, ?, ?, ?);";
             PreparedStatement st = conexao.prepareStatement(sql);
             st.setInt(1, buyer.getCPF());

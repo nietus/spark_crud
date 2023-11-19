@@ -8,10 +8,6 @@
     <link rel="stylesheet" href="style/produtos-style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="./imgs/logo.png" crossorigin>
-    <title>EstoqueMaster</title>
     <style>
         .scroller {
             overflow-x: auto;
@@ -71,6 +67,12 @@
     <main>
         <div class="topo-estq">
     <div class="button-group">
+    <!-- Inside the <body> tag, add the following button -->
+<button id="insertBuyerButton" class="btn-estoque">
+    <span><img class="icon" src="imgs/plus.webp" alt=""></span>
+    <p>Insert Buyer</p>
+</button>
+    
         <button id="newOrEditProductButton" class="btn-estoque">
             <span><img class="icon" src="imgs/plus.webp" alt=""></span>
             <p>Novo Produto</p>
@@ -206,6 +208,57 @@ function updateButtonState() {
         venderButton.style.display = 'none';
     }
 }
+
+    // Function to handle the "Insert Buyer" button click
+    function handleInsertBuyerClick() {
+        // Prompt user for buyer data
+        const cpf = prompt('Enter CPF:');
+        const nome = prompt('Enter Name:');
+        const address = prompt('Enter Address:');
+        const contact_info = prompt('Enter Contact Info:');
+
+        // Check if any prompt was canceled
+        if (cpf === null || nome === null || address === null || contact_info === null) {
+            alert('Buyer insertion canceled.');
+            return;
+        }
+
+        // Validate if CPF is a number
+        if (isNaN(cpf) || cpf === '') {
+            alert('Please enter a valid CPF (numeric value).');
+            return;
+        }
+
+        // Create an object with the entered data
+        const buyerData = {
+            cpf: parseInt(cpf),
+            nome: nome,
+            address: address,
+            contact_info: contact_info
+        };
+
+        // Send a request to insert the buyer using the provided data
+        fetch('/buyer/insert', {
+            method: 'POST',
+            body: JSON.stringify(buyerData),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.text())
+        .then(message => {
+            console.log(message); // Log the response message to the console
+            alert(message); // Display an alert with the response message
+        })
+        .catch(error => {
+            console.error('Error inserting buyer:', error);
+            alert('An error occurred while inserting the buyer.');
+        });
+    }
+
+    // Attach event listener to the "Insert Buyer" button
+    const insertBuyerButton = document.getElementById('insertBuyerButton');
+    insertBuyerButton.addEventListener('click', handleInsertBuyerClick);
 
 // Function to handle the "Selecionar Todos" button click
 function handleSelectAllClick() {
@@ -360,6 +413,7 @@ function handleEditProductClick() {
                     console.error('Error checking session:', error);
                 });
         }
+        
 
         // Set up an interval to call checkSession every 1000 milliseconds (optional)
         const sessionCheckInterval = setInterval(checkSession, 1000);

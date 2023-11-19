@@ -11,12 +11,12 @@ public class DAO {
 	
 	public boolean conectar() {
 	    String driverName = "org.postgresql.Driver";
-	    String serverName = "estoquemaster.postgres.database.azure.com";
+	    String serverName = "localhost";
 	    String mydatabase = "estoquemaster";
 	    int porta = 5432;
 	    String url = "jdbc:postgresql://" + serverName + ":" + porta + "/" + mydatabase;
-	    String username = "postgresql";
-	    String password = "108298x@"; // Insert password
+	    String username = "postgres";
+	    String password = "108298"; // Insert password
 
 	    try {
 	        Class.forName(driverName);
@@ -27,6 +27,7 @@ public class DAO {
 	        System.err.println("Driver não encontrado: " + e.getMessage());
 	    } catch (SQLException e) {
 	        System.err.println("Conexão falhou: " + e.getMessage());
+	        System.out.println(e);
 	    }
 
 	    return false;  // Connection failed

@@ -19,6 +19,13 @@ header {
     padding: 15px 45px;
 }
 
+#transactionChartContainer {
+    width: 80%; /* Adjust as needed */
+    margin: 0 auto; /* Center the chart container */
+    margin-bottom: 100px; /* Add a bottom margin */
+}
+
+
 .logo {
     width: 93px;
 }

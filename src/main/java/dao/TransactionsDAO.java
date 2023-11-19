@@ -115,4 +115,39 @@ public class TransactionsDAO extends DAO {
         return trans;
     }
 
+    public List<Transactions> getProducts(int productId, int user_id) {
+        List<Transactions> trans = new ArrayList<>();
+
+        try {
+            String sql = "SELECT * FROM estoquemaster.transaction WHERE products_user_id = ? AND products_id = ?";
+            
+            PreparedStatement preparedStatement = conexao.prepareStatement(sql);
+            preparedStatement.setInt(1, user_id);
+            preparedStatement.setInt(2, productId);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                Transactions t = new Transactions(
+                    rs.getInt("id"),
+                    rs.getDate("date").toLocalDate(),
+                    rs.getInt("buyer_cpf"),
+                    rs.getInt("products_id"),
+                    rs.getInt("products_user_id"),
+                    rs.getInt("amount_sold"),
+                    rs.getDouble("price")
+                );
+                trans.add(t);
+            }
+
+            // Close resources
+            rs.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.err.println("Error executing the query: " + e.getMessage());
+        }
+
+        return trans;
+    }
+
+
 }

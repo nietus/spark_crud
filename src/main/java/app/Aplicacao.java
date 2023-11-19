@@ -460,7 +460,34 @@ public class Aplicacao {
 
             return html.toString();
         });
+        
+        get("/transactions/plot/:id", (request, response) -> {
+            int productId = Integer.parseInt(request.params(":id"));
+            int user_id = appUserService.getUserByEmail(userEmail).getId();
+            int isPremium = appUserService.getUserByEmail(userEmail).getIsPremium();
+            
+            System.out.println("Is user premium: " + isPremium);
 
+            // Fetch transaction data for the specified product ID
+            if(isPremium == 1) {
+            	List<Transactions> transactionList = transactionService.getTransactionsByProductId(productId, user_id);
+            	
+            	// Convert the transaction list to JSON
+            	String json = objectMapper.writeValueAsString(transactionList);
+            	System.out.println(json);
+            	
+            	response.type("application/json");
+            	response.status(200);
+            	return json;
+            }
+            
+            return "";
+        });
+
+
+
+
+        
         // Delete a transaction by ID
         delete("/transactions/delete/:id", (request, response) -> {
             int id = Integer.parseInt(request.params(":id"));

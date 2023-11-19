@@ -73,4 +73,8 @@ public class TransactionService {
             return false;
         }
     }
+
+	public List<Transactions> getTransactionsByProductId(int productId, int user_id) {
+	        return transactionsDAO.getProducts(productId,user_id);
+	}
 }
