@@ -72,15 +72,6 @@ header {
     width: 26px
 }
 
-.btns-estoque {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 15px 20px;
-    flex-wrap: wrap;
-    gap: 40px
-}
-
 .direita-btns {
     display: flex;
     gap: 20px

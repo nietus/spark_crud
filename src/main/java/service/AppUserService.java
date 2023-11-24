@@ -25,12 +25,11 @@ public class AppUserService {
         return appUserDAO.getAll();
     }
 
-    public boolean updateAppUser(String email, String newEmail, String newPassword, int newIsPremium) {
+    public boolean updateAppUser(String email, String newPassword) {
         AppUsers appUser = appUserDAO.get(email);
         if (appUser != null) {
-            appUser.setEmail(newEmail);
+            appUser.setEmail(email);
             appUser.setPassword(newPassword);
-            appUser.setIsPremium(newIsPremium);
             return appUserDAO.update(appUser);
         }
         return false;

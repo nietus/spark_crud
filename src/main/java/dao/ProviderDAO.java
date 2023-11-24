@@ -61,7 +61,7 @@ public class ProviderDAO extends DAO {
         List<Provider> providerList = new ArrayList<>();
 
         try {
-            String sql = "SELECT * FROM estoquemaster.provider";
+            String sql = "SELECT CNPJ, nome, contact_info FROM estoquemaster.provider";
             PreparedStatement preparedStatement = conexao.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
 

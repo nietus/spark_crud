@@ -77,4 +77,8 @@ public class TransactionService {
 	public List<Transactions> getTransactionsByProductId(int productId, int user_id) {
 	        return transactionsDAO.getProducts(productId,user_id);
 	}
+
+	public List<Transactions> getTransactionsByCPF(int user_id, String cpf) {
+		return transactionsDAO.getProductsSpecific(user_id,cpf);
+	}
 }

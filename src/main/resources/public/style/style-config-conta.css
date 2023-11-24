@@ -14,43 +14,20 @@ body {
     padding: 0;
 }
 
-header {
-    background-color: #cff4fc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 45px;
+#headCampos{
+    background-color: #0063b2;
 }
 
-.logo {
-    width: 93px;
+#notificacao{
+    background-color: #0063b2;
 }
 
-.btn-entre {
-    background-color: #0063B2;
-    padding: 20px 10px;
-    color: white;
-    font-size: 18px;
-    font-weight: 200;
-    border: none;
-    border-radius: 10px;
-    width: 200px;
-    transition: 0.9s;
+#logout{
+    background-color: #0063b2;
+    transition: 0.2s;
 }
 
-.btn-entre:hover {
-    background-color: #004985;
+#logout:hover{
     cursor: pointer;
-}
-
-.btn-entre:active {
-    background-color: #0063B2;
-    transition: none;
-}
-
-#impar {
-    position: absolute;
-    bottom: 10%;
-    left: 50%;
-    transform: translate3d(-50%, -50%, 0);
+    background-color: #337cdc;
 }

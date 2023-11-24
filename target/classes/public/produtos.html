@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE edge">
@@ -7,16 +8,48 @@
     <link rel="stylesheet" href="style/index-style.css">
     <link rel="stylesheet" href="style/produtos-style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="style/sidebar.css">
     <style>
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            /* Slightly transparent background */
+            padding: 40px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            /* Rounded corners */
+            z-index: 999;
+        }
+
+        .popup-content {
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 28px;
+            /* Larger font size */
+            color: #555;
+            /* Darker color */
+        }
+
+
+
         .scroller {
             overflow-x: auto;
             white-space: nowrap;
-        }
-		
-        .btn {
-            padding: 6px;
-            font-size: 15px;
         }
 
         .produtos-tabela {
@@ -31,121 +64,185 @@
             border: 1px solid #dddddd;
         }
 
-        .btn-estoque {
-            display: inline-block;
-            margin: 5px;
-        }
-
         .produtos-tabela tbody tr:hover {
             background-color: #e8e8e8;
             cursor: pointer;
         }
-        
-        .button-group {
-    display: flex;
-    align-items: center; /* Vertically align the buttons */
-    justify-content: flex-start; /* Align buttons to the left */
-    gap: 5px;
-}
 
-.btn-pesquisa {
-    display: flex;
-    justify-content: flex-end; /* Align to the right */
-    cursor: pointer;
-}
+        .btn-pesquisa {
+            display: flex;
+            justify-content: flex-end;
+            /* Align to the right */
+            cursor: pointer;
+        }
 
+        .no-transactions {
+            color: red;
+            font-style: italic;
+            margin-top: 10px;
+            white-space: nowrap;
+        }
     </style>
 </head>
+
 <body>
-    <header>
-        <a href="#"><img class="logo" src="imgs/logo.png" alt="Logo da EstoqueMaster"></a>
-        <a href="config-conta.html"><button class="btn-entre">Minha conta</button></a>
-    </header>
-    <br><br>
-    <h2 class="titulo-estoque">Meu estoque</h2>
-    <br>
-    <main>
-        <div class="topo-estq">
-    <div class="button-group">
-    <!-- Inside the <body> tag, add the following button -->
-<button id="insertBuyerButton" class="btn-estoque">
-    <span><img class="icon" src="imgs/plus.webp" alt=""></span>
-    <p>Insert Buyer</p>
-</button>
-    
-        <button id="newOrEditProductButton" class="btn-estoque">
-            <span><img class="icon" src="imgs/plus.webp" alt=""></span>
-            <p>Novo Produto</p>
-        </button>
-        <button id="venderButton" class="btn-estoque" style="display: none;">
-            <span><img class="icon" src="https://th.bing.com/th/id/R.6318034f4010d3cdb522d298f14ebb18?rik=hwaqy7dvoCD34Q&riu=http%3a%2f%2fclipart-library.com%2fnew_gallery%2f267-2675544_dinero-png-sack-of-money-icon-png.png&ehk=8jd%2fCfJuSZGbF4mveS32%2fdZzIMi6xSUj7Z17jBeJSkM%3d&risl=&pid=ImgRaw&r=0" alt=""></span></br>
-            <p>Vender</p>
-        </button>
+    <div class="wrapper d-flex align-items-stretch">
+        <nav id="sidebar">
+            <h1><a href="produtos.html" class="logo">EstoqueMaster</a></h1>
+            <ul class="list-unstyled components mb-5">
+                <li class="active">
+                    <a href="produtos.html"><span class="mr-3"></span> Produtos</a>
+                </li>
+                <li id="newOrEditProduct">
+                    <a href="cadastro-produto.html"><span class="mr-3"></span> Cadastrar Produto</a>
+                </li>
+                <li id="insertBuyerButton">
+                    <a href="#"><span class="mr-3"></span> Cadastrar Comprador</a>
+                </li>
+                
+                <li>
+                    <a href="config-conta.html"><span class="mr-3"></span> Configurações</a>
+                </li>
+                <li id="venderButtonSidebar" style="display: none;">
+                    <a href="#" onclick="handleVenderClickSidebar">Vender</a>
+                </li>
+            </ul>
+
+        </nav>
+        <main>
+
+            <div class="btns-estoque mt-4 mx-5">
+                <div class="direita-btns">
+                        <button class="btn-pesquisa h-25" id="btnPesquisa">
+                            <span><img class="icon" src="imgs/search-icon.png" alt=""></span>
+                        </button>
+                </div>
+                <div class="esquerda-btns">
+                    <button onclick="handleExcluirSelecionado()" class="btn-estoque"
+                        style="background-color: rgb(231, 17, 17);" id="btn-excluir">Excluir selecionado</button>
+                    <button class="btn-estoque" id="btn-selecionar-todos">Selecionar todos</button>
+                </div>
+            </div>
+
+            <div class="scroller mx-5">
+                <table class="produtos-tabela">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Id</th>
+                            <th>Preço</th>
+                            <th>Estoque</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        
+                    </tbody>
+                </table>
+            </div>
+        </main>
     </div>
-    <button class="btn-pesquisa" id="btnPesquisa">
-        <span><img class="icon" src="imgs/search-icon.png" alt=""></span>
-    </button>
-</div>
 
-
-        <div class="btns-estoque">
-            <div class="direita-btns">
-                <button class="btn-estoque" id="btn-todos">Todos</button>
-                <button class="btn-estoque" id="btn-produtos-faltando">Mostrar produtos em falta</button>
-            </div>
-            <div class="esquerda-btns">
-                <button onclick="handleExcluirSelecionado()" class="btn-estoque" style="background-color: rgb(231, 17, 17);" id="btn-excluir">Excluir selecionado</button>
-                <button class="btn-estoque" id="btn-selecionar-todos">Selecionar todos</button>
-            </div>
-        </div>
-        <div class="scroller">
-            <table class="produtos-tabela">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Id</th>
-                        <th>Preço</th>
-                        <th>Estoque</th>
-                    </tr>
-                </thead>
-                <tbody id="productTableBody">
-                    <!-- Product data -->
-                </tbody>
-            </table>
-        </div>
-    </main>
     <footer>
         <p>© EstoqueMaster</p>
-        <a target="_blank" href="https://github.com/ICEI-PUC-Minas-PMGCC-TI/ti-1-pmg-cc-m-20231-gestao-e-planejamento-de-empresas">
+        <a target="_blank"
+            href="https://github.com/ICEI-PUC-Minas-PMGCC-TI/ti-1-pmg-cc-m-20231-gestao-e-planejamento-de-empresas">
             <img src="imgs/github-icon.png" alt="">
         </a>
     </footer>
+
+    <div id="transactionWindow" class="popup">
+        <div class="popup-content">
+            <div id="transactionContent"></div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $("#btnPesquisa").click(function () {
+                const userCPF = prompt('Entre o CPF do comprador:');
+
+                if (userCPF !== null && userCPF !== "") {
+                    $.ajax({
+                        type: "GET",
+                        url: `/transactions/listSpecific?cpf=${userCPF}`,
+                        success: function (data) {
+                            showTransactionWindow(data);
+                        },
+                        error: function () {
+                            alert("Error fetching transactions.");
+                        }
+                    });
+                }
+            });
+
+
+            // Function to show the styled transaction window
+            function showTransactionWindow(transactionData) {
+                const transactionWindow = $("#transactionWindow");
+                const content = $("#transactionContent");
+
+                // Set the content of the window
+                content.html(transactionData);
+
+                // Show the styled window and attach a click event to the close button
+                transactionWindow.show();
+
+                // Attach a click event to the close button
+                $(".popup-close-btn").click(function () {
+                    // Clear selected rows and update their appearance
+                    clearSelectedRows();
+
+                    // Hide the transaction window using jQuery's hide method
+                    transactionWindow.hide();
+                    content.html(""); // Clear the content when the window is closed
+                });
+            }
+
+            // Function to clear selected rows and update their appearance
+            function clearSelectedRows() {
+                selectedRowIds.forEach(rowId => {
+                    const row = document.getElementById(rowId);
+                    if (row) {
+                        row.style.backgroundColor = '';
+                        row.classList.remove('selected'); // Remove the "selected" class
+                    }
+                });
+                selectedRowIds.length = 0; // Clear the selectedRowIds array
+                updateButtonState(); // Update the button state
+            }
+        });
+
+    </script>
+
+
+
+
     <script>
         // Array to store selected row IDs
         const selectedRowIds = [];
 
         function handleRowClick(rowId) {
-    const row = document.getElementById(rowId);
+            const row = document.getElementById(rowId);
 
-    if (selectedRowIds.includes(rowId)) {
-        // Deselect the row
-        const index = selectedRowIds.indexOf(rowId);
-        selectedRowIds.splice(index, 1);
-        row.style.backgroundColor = '';
-        row.classList.remove('selected'); // Remove the "selected" class
-        console.log(`Deselected Row ID: ${rowId}`);
-    } else {
-        // Select the current row
-        selectedRowIds.push(rowId);
-        row.style.backgroundColor = '#FF7F7F'; // Set the desired background color
-        row.classList.add('selected'); // Add the "selected" class
-        console.log(`Selected Row ID: ${rowId}`);
-    }
-    console.log(selectedRowIds);
+            if (selectedRowIds.includes(rowId)) {
+                // Deselect the row
+                const index = selectedRowIds.indexOf(rowId);
+                selectedRowIds.splice(index, 1);
+                row.style.backgroundColor = '';
+                row.classList.remove('selected'); // Remove the "selected" class
+                console.log(`Deselected Row ID: ${rowId}`);
+            } else {
+                // Select the current row
+                selectedRowIds.push(rowId);
+                row.style.backgroundColor = '#FF7F7F'; // Set the desired background color
+                row.classList.add('selected'); // Add the "selected" class
+                console.log(`Selected Row ID: ${rowId}`);
+            }
+            console.log(selectedRowIds);
 
-    // Call the function to update the button state
-    updateButtonState();
-}
+            // Call the function to update the button state
+            updateButtonState();
+        }
 
         function handleExcluirSelecionado() {
             // Send the selectedRowIds array to the server for deletion
@@ -156,17 +253,17 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => {
-                if (response.status === 200) {
-                    alert('Deleted');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    fetchProducts();
-                }
-            });
+                .then(response => {
+                    if (response.status === 200) {
+                        alert('Deleted');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        fetchProducts();
+                    }
+                });
         }
 
         // Function to fetch products and add click event listeners
@@ -186,216 +283,222 @@
                 });
         }
 
-        // Function to update the button text and behavior
-function updateButtonState() {
-    const newOrEditProductButton = document.getElementById('newOrEditProductButton');
-    const venderButton = document.getElementById('venderButton');
-    if (selectedRowIds.length === 1) {
-        // If a single row is selected, change the button to "Editar Produto"
-        newOrEditProductButton.innerHTML = '<span><img class="icon" src="imgs/update.png" alt=""></span><p>Editar Produto</p>';
-        newOrEditProductButton.removeEventListener('click', handleNewProductClick);
-        newOrEditProductButton.addEventListener('click', handleEditProductClick);
-        venderButton.style.display = 'inline-block';
-    } else if (selectedRowIds.length > 1) {
-        newOrEditProductButton.innerHTML = '<span><img class="icon" src="imgs/plus.webp" alt=""></span><p>Novo Produto</p>';
-        newOrEditProductButton.removeEventListener('click', handleEditProductClick);
-        newOrEditProductButton.addEventListener('click', handleNewProductClick);
-        venderButton.style.display = 'none';
-    } else {
-        newOrEditProductButton.innerHTML = '<span><img class="icon" src="imgs/plus.webp" alt=""></span><p>Novo Produto</p>';
-        newOrEditProductButton.removeEventListener('click', handleEditProductClick);
-        newOrEditProductButton.addEventListener('click', handleNewProductClick);
-        venderButton.style.display = 'none';
-    }
-}
+      function updateButtonState() {
+            const newOrEditProductButton = document.getElementById('newOrEditProduct');
+            const venderButtonSidebar = document.getElementById('venderButtonSidebar');
 
-    // Function to handle the "Insert Buyer" button click
-    function handleInsertBuyerClick() {
-        // Prompt user for buyer data
-        const cpf = prompt('Enter CPF:');
-        const nome = prompt('Enter Name:');
-        const address = prompt('Enter Address:');
-        const contact_info = prompt('Enter Contact Info:');
+            if (selectedRowIds.length === 1) {
+                newOrEditProductButton.innerHTML = '<a href="#" class="mr-3">Detalhar Produto</a>';
+                newOrEditProductButton.removeEventListener('click', handleNewProductClick);
+                newOrEditProductButton.addEventListener('click', handleEditProductClick);
 
-        // Check if any prompt was canceled
-        if (cpf === null || nome === null || address === null || contact_info === null) {
-            alert('Buyer insertion canceled.');
-            return;
+                // Show the "Vender" button in the sidebar
+                venderButtonSidebar.style.display = 'block';
+
+            } else if (selectedRowIds.length > 1) {
+                newOrEditProductButton.innerHTML = '<a href="#" class="mr-3">Novo Produto</a>';
+                newOrEditProductButton.removeEventListener('click', handleEditProductClick);
+                newOrEditProductButton.addEventListener('click', handleNewProductClick);
+
+                // Hide the "Vender" button in the sidebar
+                venderButtonSidebar.style.display = 'none';
+
+            } else {
+                newOrEditProductButton.innerHTML = '<a href="#" class="mr-3">Novo Produto</a>';
+                newOrEditProductButton.removeEventListener('click', handleEditProductClick);
+                newOrEditProductButton.addEventListener('click', handleNewProductClick);
+
+                // Hide the "Vender" button in the sidebar
+                venderButtonSidebar.style.display = 'none';
+            }
         }
 
-        // Validate if CPF is a number
-        if (isNaN(cpf) || cpf === '') {
-            alert('Please enter a valid CPF (numeric value).');
-            return;
+
+        // Function to handle the "Insert Buyer" button click
+        function handleInsertBuyerClick() {
+            // Prompt user for buyer data
+            const cpf = prompt('Enter CPF:');
+            const nome = prompt('Enter Name:');
+            const address = prompt('Enter Address:');
+            const contact_info = prompt('Enter Contact Info:');
+
+            // Check if any prompt was canceled
+            if (cpf === null || nome === null || address === null || contact_info === null) {
+                alert('Buyer insertion canceled.');
+                return;
+            }
+
+            // Validate if CPF is a number
+            if (isNaN(cpf) || cpf === '') {
+                alert('Please enter a valid CPF (numeric value).');
+                return;
+            }
+
+            // Create an object with the entered data
+            const buyerData = {
+                cpf: cpf,
+                nome: nome,
+                address: address,
+                contact_info: contact_info
+            };
+
+            // Send a request to insert the buyer using the provided data
+            fetch('/buyer/insert', {
+                method: 'POST',
+                body: JSON.stringify(buyerData),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => response.text())
+                .then(message => {
+                    console.log(message); // Log the response message to the console
+                    alert(message); // Display an alert with the response message
+                })
+                .catch(error => {
+                    console.error('Error inserting buyer:', error);
+                    alert('An error occurred while inserting the buyer.');
+                });
         }
 
-        // Create an object with the entered data
-        const buyerData = {
-            cpf: parseInt(cpf),
-            nome: nome,
-            address: address,
-            contact_info: contact_info
-        };
+        // Attach event listener to the "Insert Buyer" button
+        const insertBuyerButton = document.getElementById('insertBuyerButton');
+        insertBuyerButton.addEventListener('click', handleInsertBuyerClick);
 
-        // Send a request to insert the buyer using the provided data
-        fetch('/buyer/insert', {
-            method: 'POST',
-            body: JSON.stringify(buyerData),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.text())
-        .then(message => {
-            console.log(message); // Log the response message to the console
-            alert(message); // Display an alert with the response message
-        })
-        .catch(error => {
-            console.error('Error inserting buyer:', error);
-            alert('An error occurred while inserting the buyer.');
-        });
-    }
+        // Function to handle the "Selecionar Todos" button click
+        function handleSelectAllClick() {
+            // Select all rows and highlight them
+            const rows = document.querySelectorAll('.produtos-tabela tbody tr');
+            rows.forEach(row => {
+                const rowId = row.getAttribute('id');
+                if (!selectedRowIds.includes(rowId)) {
+                    selectedRowIds.push(rowId);
+                    row.style.backgroundColor = '#FF7F7F'; // Set the desired background color
+                }
+            });
 
-    // Attach event listener to the "Insert Buyer" button
-    const insertBuyerButton = document.getElementById('insertBuyerButton');
-    insertBuyerButton.addEventListener('click', handleInsertBuyerClick);
-
-// Function to handle the "Selecionar Todos" button click
-function handleSelectAllClick() {
-    // Select all rows and highlight them
-    const rows = document.querySelectorAll('.produtos-tabela tbody tr');
-    rows.forEach(row => {
-        const rowId = row.getAttribute('id');
-        if (!selectedRowIds.includes(rowId)) {
-            selectedRowIds.push(rowId);
-            row.style.backgroundColor = '#FF7F7F'; // Set the desired background color
+            // Update the button state
+            updateButtonState();
         }
-    });
-    
-    // Update the button state
-    updateButtonState();
-}
 
-// Function to handle the "VENDER" button click
-function handleVenderClick() {
-    const amountToSell = prompt('Enter the amount to sell:', '1');
-    const buyerCPF = prompt('Enter the buyer cpf: ', '123456789');
+        // Function to handle the "VENDER" button click
+        function handleVenderClick() {
+            const amountToSell = prompt('Enter the amount to sell:', '1');
+            const buyerCPF = prompt('Enter the buyer cpf: ', '123456789');
 
-    if (amountToSell === null) {
-        return;
-    }
+            if (amountToSell === null) {
+                return;
+            }
 
-    if (isNaN(amountToSell) || amountToSell <= 0) {
-        alert('Please enter a valid positive number for the amount.');
-        return;
-    }
+            if (isNaN(amountToSell) || amountToSell <= 0) {
+                alert('Please enter a valid positive number for the amount.');
+                return;
+            }
 
-    // Get the product ID from the selected row's class
-    const selectedRow = document.querySelector('.produtos-tabela tbody tr.selected');
-    if (selectedRow) {
-        const selectedProductId = selectedRow.id; // Extract the product ID
-        const updatedAmount = amountToSell;
+            // Get the product ID from the selected row's class
+            const selectedRow = document.querySelector('.produtos-tabela tbody tr.selected');
+            if (selectedRow) {
+                const selectedProductId = selectedRow.id; // Extract the product ID
+                const updatedAmount = amountToSell;
 
-        // Fetch the current amount from your data source (you may need to modify this part)
-        const currentEstoque = getCurrentEstoque(selectedProductId); // Modify this to fetch the current amount
+                // Fetch the current amount from your data source (you may need to modify this part)
+                const currentEstoque = getCurrentEstoque(selectedProductId); // Modify this to fetch the current amount
 
-        if (currentEstoque >= updatedAmount) {
-            // Send a request to update the product's amount
-            fetch(`/products/updateamount/${selectedProductId}`, {
-                method: 'PUT',
-                body: JSON.stringify({ amount: updatedAmount }),
+                if (currentEstoque >= updatedAmount) {
+                    // Send a request to update the product's amount
+                    fetch(`/products/updateamount/${selectedProductId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ amount: updatedAmount }),
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                        .then(response => {
+                            if (response.status === 200) {
+                                alert(`Sold ${updatedAmount} units of the product (ID: ${selectedProductId}).`);
+
+                                // Create a new transaction
+                                createTransaction(selectedProductId, amountToSell, buyerCPF);
+
+                                // Fetch updated product data after the sale
+                                fetchProducts();
+                            } else {
+                                alert('Failed to sell the product.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error selling the product:', error);
+                            alert('An error occurred while selling the product.');
+                        });
+                } else {
+                    alert('The amount to sell exceeds the current stock (Estoque).');
+                }
+            } else {
+                alert('Please select a product to sell.');
+            }
+        }
+
+        function createTransaction(productId, amountSold, buyerCPF) {
+            // Create a new transaction by sending a request to the server
+            fetch('/transactions/insert', {
+                method: 'POST',
+                body: JSON.stringify({
+                    buyerCpf: buyerCPF,
+                    productId: parseInt(productId),
+                    amountSold: parseInt(amountSold)
+                }),
                 headers: {
                     'Content-Type': 'application/json',
                 },
             })
                 .then(response => {
-                    if (response.status === 200) {
-                        alert(`Sold ${updatedAmount} units of the product (ID: ${selectedProductId}).`);
-                        
-                        // Create a new transaction
-                        createTransaction(selectedProductId, amountToSell, buyerCPF);
-
-                        // Fetch updated product data after the sale
-                        fetchProducts();
+                    if (response.status === 201) {
+                        console.log('Transaction created successfully');
                     } else {
-                        alert('Failed to sell the product.');
+                        console.error('Failed to create a new transaction');
                     }
                 })
                 .catch(error => {
-                    console.error('Error selling the product:', error);
-                    alert('An error occurred while selling the product.');
+                    console.error('Error creating a new transaction:', error);
                 });
-        } else {
-            alert('The amount to sell exceeds the current stock (Estoque).');
         }
-    } else {
-        alert('Please select a product to sell.');
-    }
-}
 
-function createTransaction(productId, amountSold, buyerCPF) {
-    // Create a new transaction by sending a request to the server
-    fetch('/transactions/insert', {
-        method: 'POST',
-        body: JSON.stringify({
-            buyerCpf: buyerCPF,
-            productId: parseInt(productId),
-            amountSold: parseInt(amountSold)
-        }),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-    .then(response => {
-        if (response.status === 201) {
-            console.log('Transaction created successfully');
-        } else {
-            console.error('Failed to create a new transaction');
+
+        function getCurrentEstoque(productId) {
+            // Get the <td> element containing the current stock for the specified product ID
+            const stockCell = document.getElementById("amount" + productId);
+
+            if (stockCell) {
+                // Parse the current stock from the cell's content
+                const currentStock = parseFloat(stockCell.innerText);
+                return currentStock;
+            } else {
+                // Handle the case where the product ID is not found
+                console.error(`Stock cell not found for product ID ${productId}`);
+                return 0; // Return 0 as a default value
+            }
         }
-    })
-    .catch(error => {
-        console.error('Error creating a new transaction:', error);
-    });
-}
-
-
-function getCurrentEstoque(productId) {
-    // Get the <td> element containing the current stock for the specified product ID
-    const stockCell = document.getElementById("amount"+productId);
-
-    if (stockCell) {
-        // Parse the current stock from the cell's content
-        const currentStock = parseFloat(stockCell.innerText);
-        return currentStock;
-    } else {
-        // Handle the case where the product ID is not found
-        console.error(`Stock cell not found for product ID ${productId}`);
-        return 0; // Return 0 as a default value
-    }
-}
 
 
         // Attach event listeners to the "Selecionar Todos" and "VENDER" buttons
         const selectAllButton = document.getElementById('btn-selecionar-todos');
         selectAllButton.addEventListener('click', handleSelectAllClick);
-
-        const venderButton = document.getElementById('venderButton');
-        venderButton.addEventListener('click', handleVenderClick);
+        venderButtonSidebar.addEventListener('click', handleVenderClick);
         // Function to handle the "Novo Produto" button click
-function handleNewProductClick() {
-    	window.location.href = 'cadastro-produto.html';
-   }
+        function handleNewProductClick() {
+            window.location.href = 'cadastro-produto.html';
+        }
 
-// Function to handle the "Editar Produto" button click
-function handleEditProductClick() {
-    if (selectedRowIds.length === 1) {
-        // Get the selected product ID
-        const selectedProductId = selectedRowIds[0];
+        // Function to handle the "Editar Produto" button click
+        function handleEditProductClick() {
+            if (selectedRowIds.length === 1) {
+                // Get the selected product ID
+                const selectedProductId = selectedRowIds[0];
 
-        // Redirect to the edit product page (cadastro-produto.html) with the product ID as a query parameter
-        window.location.href = `cadastro-produto.html?id=${selectedProductId}`;
-    }
-}
+                // Redirect to the edit product page (cadastro-produto.html) with the product ID as a query parameter
+                window.location.href = `cadastro-produto.html?id=${selectedProductId}`;
+            }
+        }
 
 
         // Function to check the session status
@@ -413,7 +516,7 @@ function handleEditProductClick() {
                     console.error('Error checking session:', error);
                 });
         }
-        
+
 
         // Set up an interval to call checkSession every 1000 milliseconds (optional)
         const sessionCheckInterval = setInterval(checkSession, 1000);
@@ -423,4 +526,5 @@ function handleEditProductClick() {
         updateButtonState();
     </script>
 </body>
+
 </html>

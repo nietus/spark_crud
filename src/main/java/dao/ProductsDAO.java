@@ -20,12 +20,11 @@ public class ProductsDAO extends DAO {
     public void finalize() {
         close();
     }
-    
+
     public boolean insert(Products product) {
         boolean status = false;
         try {
-            String sql = "INSERT INTO estoquemaster.products (nome, amount, min_amount, description, buying_price, selling_price, vality, user_id, provider_CNPJ, img_url) "
-                       + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+            String sql = "INSERT INTO estoquemaster.products (nome, amount, min_amount, description, buying_price, selling_price, vality, user_id, provider_CNPJ, img_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement st = conexao.prepareStatement(sql);
             st.setString(1, product.getNome());
             st.setInt(2, product.getAmount());
@@ -47,54 +46,17 @@ public class ProductsDAO extends DAO {
         return status;
     }
 
-
     public Products get(int id) {
         Products product = null;
 
         try {
-            String sql = "SELECT * FROM estoquemaster.products WHERE id = ?";
+            String sql = "SELECT id, nome, amount, min_amount, description, buying_price, selling_price, vality, user_id, provider_CNPJ, img_url FROM estoquemaster.products WHERE id = ?";
             PreparedStatement preparedStatement = conexao.prepareStatement(sql);
-            preparedStatement.setInt(1, id); // Set the parameter value
+            preparedStatement.setInt(1, id);
             ResultSet rs = preparedStatement.executeQuery();
 
             if (rs.next()) {
                 product = new Products(
-                    rs.getInt("id"),
-                    rs.getString("nome"),
-                    rs.getInt("amount"),
-                    rs.getInt("min_amount"),
-                    rs.getString("description"),
-                    rs.getDouble("buying_price"),
-                    rs.getDouble("selling_price"),
-                    rs.getDate("vality").toLocalDate(),
-                    rs.getInt("user_id"),
-                    rs.getInt("provider_CNPJ"),
-                    rs.getString("img_url")
-                );
-            }
-            rs.close();
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
-        return product;
-    }
-
-
-
-    public List<Products> getAll(String email) {
-        List<Products> productsList = new ArrayList<>();
-
-        try {
-            int userId = getUserIdByEmail(email);
-
-            if (userId != -1) {
-                String sql = "SELECT * FROM estoquemaster.products WHERE user_id = ?";
-                PreparedStatement preparedStatement = conexao.prepareStatement(sql);
-                preparedStatement.setInt(1, userId);
-                ResultSet rs = preparedStatement.executeQuery();
-
-                while (rs.next()) {
-                    Products product = new Products(
                         rs.getInt("id"),
                         rs.getString("nome"),
                         rs.getInt("amount"),
@@ -106,10 +68,44 @@ public class ProductsDAO extends DAO {
                         rs.getInt("user_id"),
                         rs.getInt("provider_CNPJ"),
                         rs.getString("img_url")
+                );
+            }
+            rs.close();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+        return product;
+    }
+
+    public List<Products> getAll(String email) {
+        List<Products> productsList = new ArrayList<>();
+
+        try {
+            int userId = getUserIdByEmail(email);
+
+            if (userId != -1) {
+                String sql = "SELECT id, nome, amount, min_amount, description, buying_price, selling_price, vality, user_id, provider_CNPJ, img_url FROM estoquemaster.products WHERE user_id = ?";
+                PreparedStatement preparedStatement = conexao.prepareStatement(sql);
+                preparedStatement.setInt(1, userId);
+                ResultSet rs = preparedStatement.executeQuery();
+
+                while (rs.next()) {
+                    Products product = new Products(
+                            rs.getInt("id"),
+                            rs.getString("nome"),
+                            rs.getInt("amount"),
+                            rs.getInt("min_amount"),
+                            rs.getString("description"),
+                            rs.getDouble("buying_price"),
+                            rs.getDouble("selling_price"),
+                            rs.getDate("vality").toLocalDate(),
+                            rs.getInt("user_id"),
+                            rs.getInt("provider_CNPJ"),
+                            rs.getString("img_url")
                     );
                     productsList.add(product);
                 }
-                
+
                 rs.close();
                 preparedStatement.close();
             }
@@ -119,7 +115,7 @@ public class ProductsDAO extends DAO {
 
         return productsList;
     }
-    
+
     private int getUserIdByEmail(String email) {
         int userId = -1;
 
@@ -143,15 +139,13 @@ public class ProductsDAO extends DAO {
         return userId;
     }
 
-
     public boolean update(Products product) {
         boolean status = false;
         try {
             // Set auto-commit to false
             conexao.setAutoCommit(false);
 
-            String sql = "UPDATE estoquemaster.products SET nome = ?, amount = ?, min_amount = ?, description = ?, buying_price = ?, selling_price = ?, vality = ?, user_id = ?, provider_CNPJ = ?, img_url = ? "
-                       + "WHERE id = ?";
+            String sql = "UPDATE estoquemaster.products SET nome=?, amount=?, min_amount=?, description=?, buying_price=?, selling_price=?, vality=?, user_id=?, provider_CNPJ=?, img_url=? WHERE id=?";
             PreparedStatement st = conexao.prepareStatement(sql);
             st.setString(1, product.getNome());
             st.setInt(2, product.getAmount());
@@ -165,7 +159,6 @@ public class ProductsDAO extends DAO {
             st.setInt(9, product.getProviderCNPJ());
             st.setString(10, product.getImg());
             st.setInt(11, product.getId());
-            System.out.println(product.getId());
             st.executeUpdate();
 
             // Commit the transaction
@@ -191,12 +184,13 @@ public class ProductsDAO extends DAO {
         return status;
     }
 
-
     public boolean delete(int id) {
         boolean status = false;
         try {
-            Statement st = conexao.createStatement();
-            st.executeUpdate("DELETE FROM estoquemaster.products WHERE id = " + id);
+            String sql = "DELETE FROM estoquemaster.products WHERE id=?";
+            PreparedStatement st = conexao.prepareStatement(sql);
+            st.setInt(1, id);
+            st.executeUpdate();
             st.close();
             status = true;
         } catch (SQLException u) {

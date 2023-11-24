@@ -31,6 +31,10 @@ import model.Products;
 import model.Provider;
 import model.Transactions;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 public class Aplicacao {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -46,6 +50,24 @@ public class Aplicacao {
         Session session = request.session(false);
         return (session != null && session.attribute("email") != null);
     }
+    
+    public static String convertToMD5(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            BigInteger no = new BigInteger(1, messageDigest);
+            String hashText = no.toString(16);
+
+            while (hashText.length() < 32) {
+                hashText = "0" + hashText;
+            }
+
+            return hashText;
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("MD5 algorithm not found", e);
+        }
+    }
+    
 
     public static void main(String[] args) {
         port(5050);
@@ -70,7 +92,7 @@ public class Aplicacao {
 
                 String nome = json.get("nome").asText();
                 int amount = json.get("amount").asInt();
-                int min_amount = json.get("min_amount").asInt();
+                int min_amount = 0; // not going to use anymore
                 String description = json.get("description").asText();
                 double buyingPrice = json.get("buyingPrice").asDouble();
                 double sellingPrice = json.get("sellingPrice").asDouble();
@@ -95,7 +117,7 @@ public class Aplicacao {
                 response.status(400);
                 return "Invalid date format: " + e.getMessage();
             } catch (Exception e) {
-                response.status(400);
+                response.status(400);                System.out.println(e);
                 return "Error: " + e.getMessage();
             }
         });
@@ -149,6 +171,9 @@ public class Aplicacao {
 
                 String email = json.get("email").asText();
                 String password = json.get("password").asText();
+                
+                password = convertToMD5(password);
+                
                 int isPremium = 0;
 
                 appUserService.insertAppUser(email, password, isPremium);
@@ -201,12 +226,13 @@ public class Aplicacao {
 
         
         post("/appuser/update", (request, response) -> {
-            String email = request.queryParams("email");
-            String newEmail = request.queryParams("new-email");
+            AppUsers user = appUserService.getUserByEmail(userEmail);
+            String email = user.getEmail();
             String newPassword = request.queryParams("new-password");
-            int newIsPremium = Integer.parseInt(request.queryParams("new-isPremium"));
+            
+            newPassword = convertToMD5(newPassword);
 
-            appUserService.updateAppUser(email, newEmail, newPassword, newIsPremium);
+            appUserService.updateAppUser(email, newPassword);
             response.status(200);
             return "AppUser updated successfully!";
         });
@@ -386,7 +412,7 @@ public class Aplicacao {
 
             String email = json.get("email").asText();
             String password = json.get("password").asText();
-
+            password = convertToMD5(password);
             AppUsers user = appUserService.getUserByEmail(email);
             
             System.out.println(user.toString());
@@ -432,22 +458,118 @@ public class Aplicacao {
                 return "Error: " + e.getMessage();
             }
         });
+        
+     // Get a list of specific transactions by CPF
+        get("/transactions/listSpecific", (request, response) -> {
+            int user_id = appUserService.getUserByEmail(userEmail).getId();
+            
+            // Retrieve the CPF from the query parameters
+            String cpf = request.queryParams("cpf");
+            
+            // Check if the CPF is provided
+            if (cpf == null || cpf.isEmpty()) {
+                return "CPF parameter is missing or empty.";
+            }
+
+            List<Transactions> transactionList = transactionService.getTransactionsByCPF(user_id, cpf);
+
+            // Start building the HTML
+            StringBuilder html = new StringBuilder();
+            html.append("<html>");
+            html.append("<head>");
+            html.append("<style>");
+            html.append("body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; overflow: hidden; }");
+            html.append(".popup-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 20px; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: block; }");
+            html.append(".popup-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; }");
+            html.append(".popup-close-btn { cursor: pointer; font-size: 18px; }");
+            html.append("table { width: 100%; border-collapse: collapse; }");
+            html.append("th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }");
+            html.append(".no-transactions { color: #777; font-style: italic; }"); // New styling for no transactions
+            html.append("</style>");
+            html.append("</head>");
+            html.append("<body>");
+
+            // Popup container
+            html.append("<div class='popup-container'>");
+            html.append("<div class='popup-header'>");
+            html.append("<h1>Transaction List</h1>");
+            html.append("<span class='popup-close-btn' onclick='closePopup()'>&times;</span>");
+            html.append("</div>");
+
+            // Check if there are transactions to display
+            if (transactionList.isEmpty()) {
+                html.append("<p class='no-transactions'>No transactions available for the provided CPF.</p>");
+            } else {
+                // Table
+                html.append("<table>");
+                html.append("<tr><th>Product ID</th><th>Date</th><th>Amount</th><th>Price</th></tr>");
+
+                for (Transactions t : transactionList) {
+                    html.append("<tr>");
+                    html.append("<td>" + t.getProductsId() + "</td>");
+                    html.append("<td>" + t.getDate() + "</td>");
+                    html.append("<td>" + t.getAmount_sold() + "</td>");
+                    html.append("<td>" + t.getPrice() + "</td>");
+                    html.append("</tr>");
+                }
+
+                html.append("</table>");
+            }
+
+            // JavaScript to close the popup
+            html.append("<script>");
+            html.append("function closePopup() {");
+            html.append("  document.body.style.overflow = 'auto';");
+            html.append("  document.querySelector('.popup-container').style.display = 'none';");
+            html.append("}");
+            html.append("</script>");
+
+            html.append("</body>");
+            html.append("</html>");
+
+            return html.toString();
+        });
+
+
 
      // Get a list of all transactions
         get("/transactions/list", (request, response) -> {
-        	int user_id = appUserService.getUserByEmail(userEmail).getId();
+            int user_id = appUserService.getUserByEmail(userEmail).getId();
             List<Transactions> transactionList = transactionService.getAllTransactions(user_id);
+
+            // Check if there are transactions to display
+            if (transactionList.isEmpty()) {
+                return "No transactions available.";
+            }
 
             StringBuilder html = new StringBuilder();
             html.append("<html>");
-            html.append("<head><title>Transaction List</title></head>");
+            html.append("<head>");
+            html.append("<style>");
+            html.append("body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; overflow: hidden; }");
+            html.append(".popup-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 20px; max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: block; }");
+            html.append(".popup-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; }");
+            html.append(".popup-close-btn { cursor: pointer; font-size: 18px; }");
+            html.append("table { width: 100%; border-collapse: collapse; }");
+            html.append("th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }");
+            html.append("</style>");
+            html.append("</head>");
             html.append("<body>");
+
+            // Popup container
+            html.append("<div class='popup-container'>");
+            html.append("<div class='popup-header'>");
             html.append("<h1>Transaction List</h1>");
+            html.append("<span class='popup-close-btn' onclick='closePopup()'>&times;</span>");
+            html.append("</div>");
+
+            // Table
             html.append("<table>");
-            html.append("<tr><th>Date</th><th>Amount</th><th>Price</th></tr>");
-            
+            html.append("<tr><th>Product ID</th><th>Date</th><th>Amount</th><th>Price</th></tr>");
+
             for (Transactions t : transactionList) {
                 html.append("<tr>");
+                html.append("<td>" + t.getProductsId() + "</td>");
                 html.append("<td>" + t.getDate() + "</td>");
                 html.append("<td>" + t.getAmount_sold() + "</td>");
                 html.append("<td>" + t.getPrice() + "</td>");
@@ -455,11 +577,23 @@ public class Aplicacao {
             }
 
             html.append("</table>");
+            html.append("</div>");
+
+            // JavaScript to close the popup
+            html.append("<script>");
+            html.append("function closePopup() {");
+            html.append("  document.body.style.overflow = 'auto';");
+            html.append("  document.querySelector('.popup-container').style.display = 'none';");
+            html.append("}");
+            html.append("</script>");
+
             html.append("</body>");
             html.append("</html>");
 
             return html.toString();
         });
+
+
         
         get("/transactions/plot/:id", (request, response) -> {
             int productId = Integer.parseInt(request.params(":id"));

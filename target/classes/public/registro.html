@@ -1,33 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registration</title>
-  <link rel="icon" href="./imgs/logo.png" crossorigin>
-  <link rel="stylesheet" href="style/registro.css">
-</head>
-<body>
-  <div class="container">
-    <h1>Registration</h1>
-    <form id="registrationForm">
-      <div class="form-group">
-        <label for="email">E-mail:</label>
-        <input type="email" id="email" name="email" required>
-      </div>
-      <div class="form-group">
-        <label for="senha">Password:</label>
-        <input type="password" id="senha" name="senha" required>
-      </div>
-      <button type="submit" class="btn-registrar">Register</button>
-      <div class="login-link">
-        <a href="login.html">Click here to log in!</a>
-      </div>
-    </form>
-  </div>
-  
-  <script src="src/registro.js"></script>
 
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="icon" href="./imgs/logo.png" crossorigin>
+    <link rel="stylesheet" href="style/style-login.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="./imgs/logo.png" alt="Logo">
+        </div>
+        <div class="form-container">
+            <h1>Registro</h1>
+            <form id="registrationForm">
+                <label for="email">E-mail:</label>
+                <input type="email" id="email" name="email" placeholder="E-mail" required><br><br>
+    
+                <label for="senha">Senha:</label>
+                <input type="password" id="senha" name="senha" placeholder="Senha" required><br><br>
+    
+                <button type="submit" class="btn-entrar">Registrar</button>
+                <br><br>
+                <a href="login.html">Clique aqui para fazer o login!</a>
+            </form>
+        </div>
+    </div>
+    <script>
+    document.getElementById("registrationForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("senha").value;
+
+      // Create a JSON object with user data
+      const user = {
+        email: email,
+        password: password
+      };
+
+      // Send the user data to the server for registration
+      fetch("/appuser/insert", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(user)
+      })
+        .then(response => {
+          if (response.status === 201) {
+            alert("Registration successful!");
+            window.location.href = "login.html"; // Redirect to the login page
+          } else {
+            alert("Registration failed. Please try again.");
+          }
+        })
+        .catch(error => {
+          alert("An error occurred during registration: " + error);
+        });
+    });
+    </script>
 </body>
+
 </html>

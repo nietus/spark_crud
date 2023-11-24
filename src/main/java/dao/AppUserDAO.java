@@ -29,6 +29,7 @@ public class AppUserDAO extends DAO {
             st.setInt(3, user.getIsPremium());
             st.executeUpdate();
             st.close();
+            status = true;
         } catch (SQLException u) {
             throw new RuntimeException(u);
         }
@@ -39,14 +40,15 @@ public class AppUserDAO extends DAO {
         AppUsers user = null;
 
         try {
-            Statement st = conexao.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            String sql = "SELECT * FROM estoquemaster.appuser WHERE email='" + email + "'";
-            ResultSet rs = st.executeQuery(sql);
+            String sql = "SELECT id, email, password, ispremium FROM estoquemaster.appuser WHERE email=?";
+            PreparedStatement st = conexao.prepareStatement(sql);
+            st.setString(1, email);
+            ResultSet rs = st.executeQuery();
             if (rs.next()) {
                 user = new AppUsers(rs.getInt("id"), rs.getString("email"), rs.getString("password"), rs.getInt("ispremium"));
             }
             st.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
         return user;
@@ -56,7 +58,7 @@ public class AppUserDAO extends DAO {
         List<AppUsers> userList = new ArrayList<>();
 
         try {
-            String sql = "SELECT * FROM estoquemaster.appuser";
+            String sql = "SELECT id, email, password, ispremium FROM estoquemaster.appuser";
             PreparedStatement preparedStatement = conexao.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
 
@@ -77,12 +79,10 @@ public class AppUserDAO extends DAO {
     public boolean update(AppUsers user) {
         boolean status = false;
         try {
-            String sql = "UPDATE estoquemaster.appuser SET email = ?, password = ?, ispremium = ? WHERE email = ?";
+            String sql = "UPDATE estoquemaster.appuser SET password=? WHERE email=?";
             PreparedStatement st = conexao.prepareStatement(sql);
-            st.setString(1,  "'" + user.getEmail() + "'");
-            st.setString(2, user.getPassword());
-            st.setInt(3, user.getIsPremium());
-            st.setInt(4, user.getId());
+            st.setString(1, user.getPassword());
+            st.setString(2, user.getEmail());
             st.executeUpdate();
             st.close();
             status = true;
@@ -95,9 +95,9 @@ public class AppUserDAO extends DAO {
     public AppUsers getUserByEmail(String email) {
         AppUsers user = null;
         try {
-            String sql = "SELECT * FROM estoquemaster.appuser WHERE email=?";
+            String sql = "SELECT id, email, password, ispremium FROM estoquemaster.appuser WHERE email=?";
             PreparedStatement st = conexao.prepareStatement(sql);
-            st.setString(1, "'" + email + "'");
+            st.setString(1, email);
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
                 user = new AppUsers(rs.getInt("id"), rs.getString("email"), rs.getString("password"), rs.getInt("ispremium"));
@@ -112,8 +112,10 @@ public class AppUserDAO extends DAO {
     public boolean delete(int id) {
         boolean status = false;
         try {
-            Statement st = conexao.createStatement();
-            st.executeUpdate("DELETE FROM estoquemaster.appuser WHERE id = " + id);
+            String sql = "DELETE FROM estoquemaster.appuser WHERE id=?";
+            PreparedStatement st = conexao.prepareStatement(sql);
+            st.setInt(1, id);
+            st.executeUpdate();
             st.close();
             status = true;
         } catch (SQLException u) {

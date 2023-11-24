@@ -18,12 +18,11 @@ public class BuyerDAO extends DAO {
     public void finalize() {
         close();
     }
-    
+
     public boolean insert(Buyers buyer) {
         boolean status = false;
         try {
-            String sql = "INSERT INTO estoquemaster.buyer (cpf, name, address, contact_info, user_id) "
-                       + "VALUES (?, ?, ?, ?, ?);";
+            String sql = "INSERT INTO estoquemaster.buyer (cpf, name, address, contact_info, user_id) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement st = conexao.prepareStatement(sql);
             st.setInt(1, buyer.getCPF());
             st.setString(2, buyer.getNome());
@@ -39,57 +38,56 @@ public class BuyerDAO extends DAO {
         return status;
     }
 
-
     public Buyers get(int cpf) {
         Buyers buyer = null;
 
         try {
-            Statement st = conexao.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            String sql = "SELECT * FROM estoquemaster.buyer WHERE cpf=" + cpf;
-            ResultSet rs = st.executeQuery(sql);
+            String sql = "SELECT cpf, nome, address, contact_info, user_id FROM estoquemaster.buyer WHERE cpf=?";
+            PreparedStatement st = conexao.prepareStatement(sql);
+            st.setInt(1, cpf);
+            ResultSet rs = st.executeQuery();
             if (rs.next()) {
-                buyer = new Buyers(rs.getInt("cpf"),rs.getString("nome"), rs.getString("address"), rs.getString("contact_info"), rs.getInt("user_id"));
+                buyer = new Buyers(rs.getInt("cpf"), rs.getString("nome"), rs.getString("address"), rs.getString("contact_info"), rs.getInt("user_id"));
             }
             st.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
         return buyer;
     }
 
     public List<Buyers> getAll() {
-        List<Buyers> BuyerList = new ArrayList<>();
+        List<Buyers> buyerList = new ArrayList<>();
 
         try {
-            String sql = "SELECT * FROM estoquemaster.buyer";
+            String sql = "SELECT cpf, nome, address, contact_info, user_id FROM estoquemaster.buyer";
             PreparedStatement preparedStatement = conexao.prepareStatement(sql);
             ResultSet rs = preparedStatement.executeQuery();
 
             while (rs.next()) {
-                Buyers buyer = new Buyers(rs.getInt("cpf"),rs.getString("nome"), rs.getString("address"), rs.getString("contact_info"),rs.getInt("user_id"));
-                BuyerList.add(buyer);
+                Buyers buyer = new Buyers(rs.getInt("cpf"), rs.getString("nome"), rs.getString("address"), rs.getString("contact_info"), rs.getInt("user_id"));
+                buyerList.add(buyer);
             }
 
-            // Close resources
             rs.close();
             preparedStatement.close();
         } catch (SQLException e) {
             System.err.println("Error executing the query: " + e.getMessage());
         }
 
-        return BuyerList;
+        return buyerList;
     }
 
     public boolean update(Buyers buyer) {
         boolean status = false;
         try {
-            String sql = "UPDATE estoquemaster.buyer SET nome = ?, address = ?, contact_info = ?"
-                       + "WHERE cpf = ?";
+            String sql = "UPDATE estoquemaster.buyer SET nome=?, address=?, contact_info=?, user_id=? WHERE cpf=?";
             PreparedStatement st = conexao.prepareStatement(sql);
-            st.setInt(1, buyer.getCPF());
-            st.setString(2, buyer.getNome());
-            st.setString(3, buyer.getAddress());
-            st.setString(4, buyer.getContactInfo());
+            st.setString(1, buyer.getNome());
+            st.setString(2, buyer.getAddress());
+            st.setString(3, buyer.getContactInfo());
+            st.setInt(4, buyer.getUserId());
+            st.setInt(5, buyer.getCPF());
             st.executeUpdate();
             st.close();
             status = true;
@@ -102,8 +100,10 @@ public class BuyerDAO extends DAO {
     public boolean delete(int cpf) {
         boolean status = false;
         try {
-            Statement st = conexao.createStatement();
-            st.executeUpdate("DELETE FROM estoquemaster.buyer WHERE cpf = " + cpf);
+            String sql = "DELETE FROM estoquemaster.buyer WHERE cpf=?";
+            PreparedStatement st = conexao.prepareStatement(sql);
+            st.setInt(1, cpf);
+            st.executeUpdate();
             st.close();
             status = true;
         } catch (SQLException u) {

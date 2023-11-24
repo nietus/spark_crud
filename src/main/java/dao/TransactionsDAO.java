@@ -37,7 +37,7 @@ public class TransactionsDAO extends DAO {
 
     // Retrieve a transaction by ID
     public Transactions get(int id) throws SQLException {
-        String query = "SELECT * FROM estoquemaster.transaction WHERE id = ?";
+        String query = "SELECT id,date,buyer_cpf,product_id,products_user_id,amount_sold,price FROM estoquemaster.transaction WHERE id = ?";
         try (PreparedStatement preparedStatement = conexao.prepareStatement(query)) {
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -86,7 +86,7 @@ public class TransactionsDAO extends DAO {
         List<Transactions> trans = new ArrayList<>();
 
         try {
-            String sql = "SELECT * FROM estoquemaster.transaction WHERE products_user_id = ?";
+            String sql = "SELECT id,date,buyer_cpf,products_id,products_user_id,amount_sold,price FROM estoquemaster.transaction WHERE products_user_id = ?";
             
             PreparedStatement preparedStatement = conexao.prepareStatement(sql);
             preparedStatement.setInt(1, id);
@@ -148,6 +148,40 @@ public class TransactionsDAO extends DAO {
 
         return trans;
     }
+
+	public List<Transactions> getProductsSpecific(int user_id, String cpf) {
+		List<Transactions> trans = new ArrayList<>();
+
+        try {
+            String sql = "SELECT * FROM estoquemaster.transaction WHERE products_user_id = ? AND buyer_cpf = ?";
+            
+            PreparedStatement preparedStatement = conexao.prepareStatement(sql);
+            preparedStatement.setInt(1, user_id);
+            preparedStatement.setInt(2, Integer.parseInt(cpf));
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                Transactions t = new Transactions(
+                    rs.getInt("id"),
+                    rs.getDate("date").toLocalDate(),
+                    rs.getInt("buyer_cpf"),
+                    rs.getInt("products_id"),
+                    rs.getInt("products_user_id"),
+                    rs.getInt("amount_sold"),
+                    rs.getDouble("price")
+                );
+                trans.add(t);
+            }
+
+            // Close resources
+            rs.close();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            System.err.println("Error executing the query: " + e.getMessage());
+        }
+
+        return trans;
+	}
 
 
 }

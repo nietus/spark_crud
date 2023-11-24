@@ -66,12 +66,6 @@
                                 placeholder="0" required></input>
                         </div>
 
-                        <div id="estq-min" class="col-sm-4 mt-5">
-                            <div class="bg-primary text-white py-1 px-5 rounded-top w-100">Estoque Mínimo:</div>
-                            <input id="campoEstq-min" type="number" class="bg-info-subtle p-2 w-100 h-100 rounded-bottom text-center fs-4 fw-semibol"
-                                placeholder="0" required></input>
-                        </div>
-
                         <div id="valor-compra" class="col-sm-4 mt-5">
                             <div class="bg-primary text-white py-1 px-5 rounded-top w-100">Valor de Compra:</div>
                             <input id="campoValor-compra" type="number" step="0.01" class="bg-info-subtle p-2 w-100 h-100 rounded-bottom text-center fs-4 fw-semibol"
@@ -109,7 +103,10 @@
 
     <div id="transactionChartContainer" class="chart-container mt-4">
         <canvas id="transactionChart"></canvas>
-        <p id="r2Precision">(R2) Precision: </p>
+        <p id="r2Precision"></p>
+        <p id="maeMetric"></p>
+        <p id="mseMetric"></p>
+        <p id="rmseMetric"></p>
     </div>
     
 
@@ -143,7 +140,6 @@ if (productId !== null) {
         // Populate the input fields with the existing product data
         document.getElementById("campoNome").value = productData.nome;
         document.getElementById("campoEstq-atual").value = productData.amount;
-        document.getElementById("campoEstq-min").value = productData.min_amount;
         document.getElementById("campoDescricao").value = productData.description;
         document.getElementById("campoValor-compra").value = productData.buyingPrice;
         document.getElementById("campoValor-venda").value = productData.sellingPrice;
@@ -160,7 +156,6 @@ if (productId !== null) {
     // Retrieve the values from the input fields
     const nome = document.getElementById("campoNome").value;
     const amount = parseInt(document.getElementById("campoEstq-atual").value);
-    const min_amount = parseInt(document.getElementById("campoEstq-min").value);
     const description = document.getElementById("campoDescricao").value;
     const buyingPrice = parseFloat(document.getElementById("campoValor-compra").value);
     const sellingPrice = parseFloat(document.getElementById("campoValor-venda").value);
@@ -172,7 +167,6 @@ if (productId !== null) {
     const data = {
         nome,
         amount,
-        min_amount,
         description,
         buyingPrice,
         sellingPrice,
@@ -228,20 +222,29 @@ if (productId !== null) {
     }
 }
     
-    function openImageInput() {
-    // Show the input field for the image URL
-    const inputImageUrl = document.getElementById("inputImageUrl");
-    inputImageUrl.style.display = "block";
+function openImageInput() {
+    // Prompt the user to enter the image URL
+    const imageUrl = prompt("Enter the URL of the image:");
 
-    // Change the button text to "Salvar" and set its click action
-    const btnAddImg = document.getElementById("btnAddImg");
-    btnAddImg.innerText = "Salvar";
-    btnAddImg.removeEventListener("click", openImageInput);
-    btnAddImg.addEventListener("click", saveImage);
-
-    // Focus on the input field for user convenience
-    inputImageUrl.focus();
+    // Check if the user provided a valid URL
+    if (isValidImageUrl(imageUrl)) {
+        // Update the image source with the provided URL
+        const campoImagem = document.getElementById("campoImagem");
+        campoImagem.src = imageUrl;
+    } else {
+        // Handle the case where the user did not provide a valid URL
+        alert("Invalid image URL. Please try again.");
+    }
 }
+
+// Function to check if the provided URL is valid
+function isValidImageUrl(url) {
+    // You can add more sophisticated validation logic if needed
+    return url.trim() !== "";
+}
+
+// Rest of your script...
+
 
 // Function to save the image URL and update the image source
 function saveImage() {
@@ -263,11 +266,6 @@ function saveImage() {
     btnAddImg.addEventListener("click", openImageInput);
 }
 
-function isValidImageUrl(url) {
-    return url.trim() !== "";
-}
-
-// Fetch and display transaction data
 fetch(`/transactions/plot/${productId}`, {
   method: "GET",
   headers: {
@@ -276,10 +274,30 @@ fetch(`/transactions/plot/${productId}`, {
 })
   .then((response) => response.json())
   .then((transactionList) => {
+    // Create a set to store unique date and price pairs
+    const uniqueData = new Set();
+
+    transactionList.forEach((transaction) => {
+      const date = new Date(transaction.date);
+      const price = transaction.price;
+      const key = `${date.getTime()}_${price}`;
+
+      // Add the key to the set if it's not already present (avoiding duplicates)
+      if (!uniqueData.has(key)) {
+        uniqueData.add(key);
+      }
+    });
+
+    // Convert the set back to an array of unique data
+    const uniqueTransactionList = [...uniqueData].map((key) => {
+      const [date, price] = key.split('_');
+      return { date: new Date(Number(date)), price: Number(price) };
+    });
+
     const ctx = document.getElementById("transactionChart").getContext("2d");
 
-    const dates = transactionList.map((transaction) => new Date(transaction.date));
-    const prices = transactionList.map((transaction) => transaction.price);
+    const dates = uniqueTransactionList.map((transaction) => transaction.date);
+    const prices = uniqueTransactionList.map((transaction) => transaction.price);
 
     // Sort the dates in ascending order
     const sortedData = dates.map((date, index) => ({ date, price: prices[index] }));
@@ -316,11 +334,20 @@ fetch(`/transactions/plot/${productId}`, {
     const startPrice = m * startDate.getTime() + b;
     const endPrice = m * endDate.getTime() + b;
 
-    // Display R2 score
+    // Display metrics
     const yMean = sumY / n;
     const ssTotal = regressionData.reduce((sum, data) => sum + (data[1] - yMean) ** 2, 0);
     const ssResidual = regressionData.reduce((sum, data, index) => sum + (data[1] - (m * data[0] + b)) ** 2, 0);
     const r2 = 1 - ssResidual / ssTotal;
+
+    const mae = regressionData.reduce((sum, data) => sum + Math.abs(data[1] - (m * data[0] + b)), 0) / n;
+    const mse = regressionData.reduce((sum, data) => sum + (data[1] - (m * data[0] + b)) ** 2, 0) / n;
+    const rmse = Math.sqrt(mse);
+
+    console.log("R2 Score:", r2);
+    console.log("Mean Absolute Error:", mae);
+    console.log("Mean Squared Error:", mse);
+    console.log("Root Mean Squared Error:", rmse);
 
     // Use sortedDates in your chart data
     new Chart(ctx, {
@@ -383,13 +410,18 @@ fetch(`/transactions/plot/${productId}`, {
       },
     });
 
-    // Display R2 score
-    console.log("R2 Score:", r2);
-    document.getElementById("r2Precision").textContent = `(R2) Precision: ${r2.toFixed(2)}`;
+     if (productId) {
+      document.getElementById("r2Precision").textContent = `(R2) Precision: ${r2.toFixed(2)}`;
+      document.getElementById("maeMetric").textContent = `Mean Absolute Error: ${mae.toFixed(2)}`;
+      document.getElementById("mseMetric").textContent = `Mean Squared Error: ${mse.toFixed(2)}`;
+      document.getElementById("rmseMetric").textContent = `Root Mean Squared Error: ${rmse.toFixed(2)}`;
+    }
+    
   })
   .catch((error) => {
     console.error("Error fetching transaction data:", error);
   });
+
 
 
 </script>
@@ -397,6 +429,6 @@ fetch(`/transactions/plot/${productId}`, {
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-geWF76RCwLtnZ8qw" </script>
+        integrity="sha384-geWF76RCwLtnZ8qw"> </script>
 </body>
 </html>
